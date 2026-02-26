@@ -27,6 +27,7 @@ import {
   type AdjustmentSettings,
 } from "@/hooks/use-image-processor";
 import { cn } from "@/lib/utils";
+import { APP_NAME } from "@/global";
 
 export function ImageSharpenClient() {
   const [settings, setSettings] = useState<AdjustmentSettings>(defaultSettings);
@@ -108,33 +109,36 @@ export function ImageSharpenClient() {
     [setOriginalImage, dimensionLimit, customWidth, customHeight],
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageUpload(file);
-  };
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImageUpload(file);
+    },
+    [],
+  );
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  };
+  }, []);
 
-  const handleDragLeave = () => {
+  const handleDragLeave = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file) handleImageUpload(file);
-  };
+  }, []);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setSettings(defaultSettings);
     toast.info("Settings reset to defaults.");
-  };
+  }, []);
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     if (!originalImage) return;
 
     const canvas = document.createElement("canvas");
@@ -148,7 +152,7 @@ export function ImageSharpenClient() {
     link.click();
     document.body.removeChild(link);
     toast.success("Image exported successfully.");
-  };
+  }, []);
 
   useEffect(() => {
     if (!originalImage || !previewCanvasRef.current || !canvasMounted) return;
@@ -163,9 +167,12 @@ export function ImageSharpenClient() {
     return () => cancelAnimationFrame(rafId);
   }, [originalImage, settings, processImage, canvasMounted]);
 
-  const updateSetting = (key: keyof AdjustmentSettings, value: number) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
+  const updateSetting = useCallback(
+    (key: keyof AdjustmentSettings, value: number) => {
+      setSettings((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-200 pb-12 relative overflow-hidden font-sans">
@@ -178,17 +185,8 @@ export function ImageSharpenClient() {
       <nav className="border-b border-zinc-200 dark:border-white/5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold tracking-tight">
-                {`Image Laboratory`}
-              </h1>
+              <h1 className="text-xl font-bold tracking-tight">{APP_NAME}</h1>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                 {`Professional Adjustment Tool`}
               </span>

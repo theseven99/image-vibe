@@ -1,0 +1,579 @@
+"use client";
+
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Upload,
+  Download,
+  RotateCcw,
+  Sun,
+  Palette,
+  Loader2,
+  Maximize2,
+  Settings2,
+  History,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  useImageProcessor,
+  defaultSettings,
+  type AdjustmentSettings,
+} from "@/hooks/use-image-processor";
+import { cn } from "@/lib/utils";
+
+export function ImageSharpenClient() {
+  const [settings, setSettings] = useState<AdjustmentSettings>(defaultSettings);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [canvasMounted, setCanvasMounted] = useState(false);
+  const [dimensionLimit, setDimensionLimit] = useState<string>("1080p");
+  const [customWidth, setCustomWidth] = useState<number>(1920);
+  const [customHeight, setCustomHeight] = useState<number>(1080);
+
+  const { originalImage, setOriginalImage, processImage } = useImageProcessor();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  const handleImageUpload = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Invalid file format. Please upload an image.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new window.Image();
+        img.onload = () => {
+          let targetWidth = img.width;
+          let targetHeight = img.height;
+
+          if (dimensionLimit !== "none") {
+            let limitW = 0;
+            let limitH = 0;
+
+            if (dimensionLimit === "720p") {
+              limitW = 1280;
+              limitH = 720;
+            } else if (dimensionLimit === "1080p") {
+              limitW = 1920;
+              limitH = 1080;
+            } else if (dimensionLimit === "custom") {
+              limitW = customWidth;
+              limitH = customHeight;
+            }
+
+            if (img.width > limitW || img.height > limitH) {
+              const ratio = Math.min(limitW / img.width, limitH / img.height);
+              targetWidth = Math.round(img.width * ratio);
+              targetHeight = Math.round(img.height * ratio);
+            }
+          }
+
+          if (targetWidth !== img.width || targetHeight !== img.height) {
+            const canvas = document.createElement("canvas");
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+              const resizedImg = new window.Image();
+              resizedImg.onload = () => {
+                setOriginalImage(resizedImg);
+                setSettings(defaultSettings);
+                toast.success(
+                  `Image resized to ${targetWidth}x${targetHeight} for processing.`,
+                );
+              };
+              resizedImg.src = canvas.toDataURL("image/png");
+            }
+          } else {
+            setOriginalImage(img);
+            setSettings(defaultSettings);
+            toast.success("Image loaded successfully.");
+          }
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    },
+    [setOriginalImage, dimensionLimit, customWidth, customHeight],
+  );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageUpload(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageUpload(file);
+  };
+
+  const handleReset = () => {
+    setSettings(defaultSettings);
+    toast.info("Settings reset to defaults.");
+  };
+
+  const handleDownload = () => {
+    if (!originalImage) return;
+
+    const canvas = document.createElement("canvas");
+    processImage(originalImage, settings, canvas);
+    const processedImage = canvas.toDataURL("image/jpeg", 0.95);
+
+    const link = document.createElement("a");
+    link.href = processedImage;
+    link.download = `enhanced-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Image exported successfully.");
+  };
+
+  useEffect(() => {
+    if (!originalImage || !previewCanvasRef.current || !canvasMounted) return;
+
+    const updatePreview = () => {
+      setIsProcessing(true);
+      processImage(originalImage, settings, previewCanvasRef.current);
+      setIsProcessing(false);
+    };
+
+    const rafId = requestAnimationFrame(updatePreview);
+    return () => cancelAnimationFrame(rafId);
+  }, [originalImage, settings, processImage, canvasMounted]);
+
+  const updateSetting = (key: keyof AdjustmentSettings, value: number) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-200 pb-12 relative overflow-hidden font-sans">
+      {/* HUD-like background effect */}
+      <div className="fixed inset-0 pointer-events-none opacity-5 dark:opacity-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_1px,transparent_1px)] bg-size-[40px_40px]" />
+      </div>
+
+      {/* Header */}
+      <nav className="border-b border-zinc-200 dark:border-white/5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex flex-col">
+              <h1 className="text-xl font-bold tracking-tight">
+                {`Image Laboratory`}
+              </h1>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                {`Professional Adjustment Tool`}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {originalImage && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  className="hidden sm:flex"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" /> Reset
+                </Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={handleDownload}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                >
+                  <Download className="w-4 h-4 mr-2" /> Export
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 relative z-10">
+        {/* Preview Area */}
+        <div className="space-y-6">
+          <Card
+            className={cn(
+              "relative aspect-square sm:aspect-video flex items-center justify-center overflow-hidden transition-all duration-300",
+              "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 shadow-xl rounded-2xl",
+              isDragging &&
+                "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 scale-[1.01]",
+              !originalImage && "cursor-pointer group",
+            )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => !originalImage && fileInputRef.current?.click()}
+          >
+            <AnimatePresence mode="wait">
+              {!originalImage ? (
+                <motion.div
+                  key="upload-prompt"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex flex-col items-center gap-6 p-8 text-center"
+                >
+                  <div className="w-20 h-20 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 dark:text-zinc-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                    <Upload className="w-10 h-10" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold tracking-tight">
+                      Upload Image
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-xs">
+                      Drag and drop your image here or click to browse files
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="preview"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="relative w-full h-full p-4 flex items-center justify-center"
+                >
+                  <div className="relative w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-950 rounded-lg overflow-hidden border border-zinc-200 dark:border-white/5">
+                    <canvas
+                      ref={(node) => {
+                        previewCanvasRef.current = node;
+                        if (node && !canvasMounted) setCanvasMounted(true);
+                      }}
+                      className={cn(
+                        "max-w-full max-h-full object-contain transition-opacity duration-300",
+                        showOriginal
+                          ? "opacity-0 invisible"
+                          : "opacity-100 visible",
+                      )}
+                    />
+
+                    {originalImage && (
+                      <div
+                        className={cn(
+                          "absolute inset-0 transition-opacity duration-300",
+                          showOriginal
+                            ? "opacity-100 visible"
+                            : "opacity-0 invisible",
+                        )}
+                      >
+                        <img
+                          src={originalImage.src}
+                          alt="Original"
+                          className="object-contain"
+                        />
+                      </div>
+                    )}
+
+                    {/* Compare Button */}
+                    <Button
+                      onMouseDown={() => setShowOriginal(true)}
+                      onMouseUp={() => setShowOriginal(false)}
+                      onMouseLeave={() => setShowOriginal(false)}
+                      onTouchStart={() => setShowOriginal(true)}
+                      onTouchEnd={() => setShowOriginal(false)}
+                      className="absolute bottom-4 right-4 bg-zinc-900/80 dark:bg-white/10 backdrop-blur text-white px-4 py-2 rounded-lg text-xs font-bold tracking-widest uppercase border border-white/10 hover:bg-zinc-900 dark:hover:bg-white/20 transition-colors z-20"
+                    >
+                      Hold to Compare
+                    </Button>
+
+                    {isProcessing && (
+                      <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest shadow-lg z-20">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Processing...
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Card>
+
+          {/* Info Bar */}
+          {originalImage && (
+            <div className="flex justify-between items-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 p-4 rounded-xl shadow-sm">
+              <div className="flex gap-6">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider">
+                    Resolution
+                  </span>
+                  <span className="text-sm font-mono font-bold">
+                    {originalImage.width} × {originalImage.height}
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase text-zinc-500 tracking-wider">
+                    Total Pixels
+                  </span>
+                  <span className="text-sm font-mono font-bold">
+                    {(
+                      originalImage.width * originalImage.height
+                    ).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setOriginalImage(null);
+                  setCanvasMounted(false);
+                }}
+                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+              >
+                Clear Image
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Adjustments Sidebar */}
+        <aside className="space-y-6">
+          <Tabs defaultValue="exposure" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 h-11 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-white/5">
+              <TabsTrigger
+                value="exposure"
+                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm text-[10px] font-bold uppercase tracking-wider"
+              >
+                <Sun className="w-3.5 h-3.5 mr-2" /> Light
+              </TabsTrigger>
+              <TabsTrigger
+                value="color"
+                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm text-[10px] font-bold uppercase tracking-wider"
+              >
+                <Palette className="w-3.5 h-3.5 mr-2" /> Color
+              </TabsTrigger>
+              <TabsTrigger
+                value="detail"
+                className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:shadow-sm text-[10px] font-bold uppercase tracking-wider"
+              >
+                <Settings2 className="w-3.5 h-3.5 mr-2" /> Detail
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="mt-6 space-y-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 p-6 rounded-2xl">
+              {/* Exposure Tabs */}
+              <TabsContent value="exposure" className="space-y-6 mt-0">
+                <ControlGroup
+                  label="Exposure"
+                  value={settings.exposure}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("exposure", v)}
+                />
+                <ControlGroup
+                  label="Contrast"
+                  value={settings.contrast}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("contrast", v)}
+                />
+                <ControlGroup
+                  label="Highlights"
+                  value={settings.highlights}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("highlights", v)}
+                />
+                <ControlGroup
+                  label="Shadows"
+                  value={settings.shadows}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("shadows", v)}
+                />
+              </TabsContent>
+
+              {/* Color Tabs */}
+              <TabsContent value="color" className="space-y-6 mt-0">
+                <ControlGroup
+                  label="Temperature"
+                  value={settings.temperature}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("temperature", v)}
+                />
+                <ControlGroup
+                  label="Tint"
+                  value={settings.tint}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("tint", v)}
+                />
+                <ControlGroup
+                  label="Saturation"
+                  value={settings.saturation}
+                  min={-100}
+                  max={100}
+                  onChange={(v) => updateSetting("saturation", v)}
+                />
+              </TabsContent>
+
+              {/* Detail Tabs */}
+              <TabsContent value="detail" className="space-y-6 mt-0">
+                <ControlGroup
+                  label="Sharpening"
+                  value={settings.sharpen}
+                  min={0}
+                  max={100}
+                  onChange={(v) => updateSetting("sharpen", v)}
+                  description="Enhances edge definition and micro-contrast"
+                />
+
+                <div className="pt-6 border-t border-zinc-100 dark:border-white/5 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Maximize2 className="w-4 h-4 text-blue-600" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                      Output Resolution
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "none", label: "Native" },
+                      { id: "720p", label: "720p HD" },
+                      { id: "1080p", label: "1080p FHD" },
+                      { id: "custom", label: "Custom" },
+                    ].map((opt) => (
+                      <Button
+                        key={opt.id}
+                        onClick={() => setDimensionLimit(opt.id)}
+                        className={cn(
+                          "px-3 py-2 text-[10px] font-bold uppercase tracking-wider border rounded-lg transition-all",
+                          dimensionLimit === opt.id
+                            ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm"
+                            : "bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-700",
+                        )}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
+                  </div>
+
+                  {dimensionLimit === "custom" && (
+                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-zinc-400">
+                          Width
+                        </Label>
+                        <input
+                          type="number"
+                          value={customWidth}
+                          onChange={(e) =>
+                            setCustomWidth(Number(e.target.value))
+                          }
+                          className="w-full bg-zinc-50 dark:bg-black border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 font-mono text-xs text-center focus:ring-1 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] uppercase font-bold text-zinc-400">
+                          Height
+                        </Label>
+                        <input
+                          type="number"
+                          value={customHeight}
+                          onChange={(e) =>
+                            setCustomHeight(Number(e.target.value))
+                          }
+                          className="w-full bg-zinc-50 dark:bg-black border border-zinc-200 dark:border-white/10 rounded-lg px-2 py-1.5 font-mono text-xs text-center focus:ring-1 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+
+          <div className="flex justify-center items-center gap-2 opacity-50">
+            <div className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
+            <History className="w-3 h-3" />
+            <div className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
+          </div>
+        </aside>
+      </main>
+    </div>
+  );
+}
+
+interface ControlGroupProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  description?: string;
+}
+
+function ControlGroup({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+  description,
+}: ControlGroupProps) {
+  return (
+    <div className="space-y-3 group">
+      <div className="flex justify-between items-end">
+        <div className="flex flex-col">
+          <Label className="text-xs font-bold tracking-tight mb-0.5">
+            {label}
+          </Label>
+          {description && (
+            <span className="text-[9px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-tighter">
+              {description}
+            </span>
+          )}
+        </div>
+        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
+          {value > 0 ? `+${value}` : value}
+        </span>
+      </div>
+      <Slider
+        value={[value]}
+        min={min}
+        max={max}
+        step={1}
+        onValueChange={(vals) => onChange(vals[0])}
+        className="cursor-pointer"
+      />
+    </div>
+  );
+}

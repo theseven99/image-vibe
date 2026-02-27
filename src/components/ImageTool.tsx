@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Upload,
@@ -20,21 +20,21 @@ import {
   Code2,
   Globe,
   Terminal,
-} from "lucide-react";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useImageProcessor,
   defaultSettings,
   type AdjustmentSettings,
-} from "@/hooks/use-image-processor";
-import { cn } from "@/lib/utils";
-import { APP_NAME } from "@/global";
+} from '@/hooks/use-image-processor';
+import { cn } from '@/lib/utils';
+import { APP_NAME } from '@/global';
 
 export function ImageSharpenClient() {
   const [settings, setSettings] = useState<AdjustmentSettings>(defaultSettings);
@@ -42,7 +42,7 @@ export function ImageSharpenClient() {
   const [showOriginal, setShowOriginal] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [canvasMounted, setCanvasMounted] = useState(false);
-  const [dimensionLimit, setDimensionLimit] = useState<string>("1080p");
+  const [dimensionLimit, setDimensionLimit] = useState<string>('1080p');
   const [customWidth, setCustomWidth] = useState<number>(1920);
   const [customHeight, setCustomHeight] = useState<number>(1080);
 
@@ -53,8 +53,8 @@ export function ImageSharpenClient() {
 
   const handleImageUpload = useCallback(
     (file: File) => {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Invalid file format. Please upload an image.");
+      if (!file.type.startsWith('image/')) {
+        toast.error('Invalid file format. Please upload an image.');
         return;
       }
       const reader = new FileReader();
@@ -64,17 +64,17 @@ export function ImageSharpenClient() {
           let targetWidth = img.width;
           let targetHeight = img.height;
 
-          if (dimensionLimit !== "none") {
+          if (dimensionLimit !== 'none') {
             let limitW = 0;
             let limitH = 0;
 
-            if (dimensionLimit === "720p") {
+            if (dimensionLimit === '720p') {
               limitW = 1280;
               limitH = 720;
-            } else if (dimensionLimit === "1080p") {
+            } else if (dimensionLimit === '1080p') {
               limitW = 1920;
               limitH = 1080;
-            } else if (dimensionLimit === "custom") {
+            } else if (dimensionLimit === 'custom') {
               limitW = customWidth;
               limitH = customHeight;
             }
@@ -87,10 +87,10 @@ export function ImageSharpenClient() {
           }
 
           if (targetWidth !== img.width || targetHeight !== img.height) {
-            const canvas = document.createElement("canvas");
+            const canvas = document.createElement('canvas');
             canvas.width = targetWidth;
             canvas.height = targetHeight;
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext('2d');
             if (ctx) {
               ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
               const resizedImg = new window.Image();
@@ -101,12 +101,12 @@ export function ImageSharpenClient() {
                   `Image resized to ${targetWidth}x${targetHeight} for processing.`,
                 );
               };
-              resizedImg.src = canvas.toDataURL("image/png");
+              resizedImg.src = canvas.toDataURL('image/png');
             }
           } else {
             setOriginalImage(img);
             setSettings(defaultSettings);
-            toast.success("Image loaded successfully.");
+            toast.success('Image loaded successfully.');
           }
         };
         img.src = event.target?.result as string;
@@ -121,7 +121,7 @@ export function ImageSharpenClient() {
       const file = e.target.files?.[0];
       if (file) handleImageUpload(file);
     },
-    [],
+    [handleImageUpload],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -133,33 +133,36 @@ export function ImageSharpenClient() {
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImageUpload(file);
-  }, []);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file) handleImageUpload(file);
+    },
+    [handleImageUpload],
+  );
 
   const handleReset = useCallback(() => {
     setSettings(defaultSettings);
-    toast.info("Settings reset to defaults.");
+    toast.info('Settings reset to defaults.');
   }, []);
 
   const handleDownload = useCallback(() => {
     if (!originalImage) return;
 
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     processImage(originalImage, settings, canvas);
-    const processedImage = canvas.toDataURL("image/jpeg", 0.95);
+    const processedImage = canvas.toDataURL('image/jpeg', 0.95);
 
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = processedImage;
     link.download = `enhanced-${Date.now()}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Image exported successfully.");
-  }, []);
+    toast.success('Image exported successfully.');
+  }, [originalImage, processImage, settings]);
 
   useEffect(() => {
     if (!originalImage || !previewCanvasRef.current || !canvasMounted) return;
@@ -251,11 +254,11 @@ export function ImageSharpenClient() {
         <div className="space-y-6">
           <Card
             className={cn(
-              "relative aspect-square sm:aspect-video flex items-center justify-center overflow-hidden transition-all duration-300",
-              "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 shadow-xl rounded-2xl",
+              'relative aspect-square sm:aspect-video flex items-center justify-center overflow-hidden transition-all duration-300',
+              'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 shadow-xl rounded-2xl',
               isDragging &&
-                "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 scale-[1.01]",
-              !originalImage && "cursor-pointer group",
+                'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 scale-[1.01]',
+              !originalImage && 'cursor-pointer group',
             )}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -304,20 +307,20 @@ export function ImageSharpenClient() {
                         if (node && !canvasMounted) setCanvasMounted(true);
                       }}
                       className={cn(
-                        "max-w-full max-h-full object-contain transition-opacity duration-300",
+                        'max-w-full max-h-full object-contain transition-opacity duration-300',
                         showOriginal
-                          ? "opacity-0 invisible"
-                          : "opacity-100 visible",
+                          ? 'opacity-0 invisible'
+                          : 'opacity-100 visible',
                       )}
                     />
 
                     {originalImage && (
                       <div
                         className={cn(
-                          "absolute inset-0 transition-opacity duration-300",
+                          'absolute inset-0 transition-opacity duration-300',
                           showOriginal
-                            ? "opacity-100 visible"
-                            : "opacity-0 invisible",
+                            ? 'opacity-100 visible'
+                            : 'opacity-0 invisible',
                         )}
                       >
                         <img
@@ -424,28 +427,28 @@ export function ImageSharpenClient() {
                   value={settings.exposure}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("exposure", v)}
+                  onChange={(v) => updateSetting('exposure', v)}
                 />
                 <ControlGroup
                   label="Contrast"
                   value={settings.contrast}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("contrast", v)}
+                  onChange={(v) => updateSetting('contrast', v)}
                 />
                 <ControlGroup
                   label="Highlights"
                   value={settings.highlights}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("highlights", v)}
+                  onChange={(v) => updateSetting('highlights', v)}
                 />
                 <ControlGroup
                   label="Shadows"
                   value={settings.shadows}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("shadows", v)}
+                  onChange={(v) => updateSetting('shadows', v)}
                 />
               </TabsContent>
 
@@ -456,21 +459,21 @@ export function ImageSharpenClient() {
                   value={settings.temperature}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("temperature", v)}
+                  onChange={(v) => updateSetting('temperature', v)}
                 />
                 <ControlGroup
                   label="Tint"
                   value={settings.tint}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("tint", v)}
+                  onChange={(v) => updateSetting('tint', v)}
                 />
                 <ControlGroup
                   label="Saturation"
                   value={settings.saturation}
                   min={-100}
                   max={100}
-                  onChange={(v) => updateSetting("saturation", v)}
+                  onChange={(v) => updateSetting('saturation', v)}
                 />
               </TabsContent>
 
@@ -481,7 +484,7 @@ export function ImageSharpenClient() {
                   value={settings.sharpen}
                   min={0}
                   max={100}
-                  onChange={(v) => updateSetting("sharpen", v)}
+                  onChange={(v) => updateSetting('sharpen', v)}
                   description="Enhances edge definition and micro-contrast"
                 />
                 <ControlGroup
@@ -489,7 +492,7 @@ export function ImageSharpenClient() {
                   value={settings.noiseReduction}
                   min={0}
                   max={100}
-                  onChange={(v) => updateSetting("noiseReduction", v)}
+                  onChange={(v) => updateSetting('noiseReduction', v)}
                   description="Smooths out digital noise and grain"
                 />
 
@@ -503,19 +506,19 @@ export function ImageSharpenClient() {
 
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { id: "none", label: "Native" },
-                      { id: "720p", label: "720p HD" },
-                      { id: "1080p", label: "1080p FHD" },
-                      { id: "custom", label: "Custom" },
+                      { id: 'none', label: 'Native' },
+                      { id: '720p', label: '720p HD' },
+                      { id: '1080p', label: '1080p FHD' },
+                      { id: 'custom', label: 'Custom' },
                     ].map((opt) => (
                       <Button
                         key={opt.id}
                         onClick={() => setDimensionLimit(opt.id)}
                         className={cn(
-                          "px-3 py-2 text-[10px] font-bold uppercase tracking-wider border rounded-lg transition-all",
+                          'px-3 py-2 text-[10px] font-bold uppercase tracking-wider border rounded-lg transition-all',
                           dimensionLimit === opt.id
-                            ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm"
-                            : "bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-700",
+                            ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 border-zinc-900 dark:border-white shadow-sm'
+                            : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-700',
                         )}
                       >
                         {opt.label}
@@ -523,7 +526,7 @@ export function ImageSharpenClient() {
                     ))}
                   </div>
 
-                  {dimensionLimit === "custom" && (
+                  {dimensionLimit === 'custom' && (
                     <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                       <div className="space-y-1">
                         <Label className="text-[10px] uppercase font-bold text-zinc-400">
@@ -709,9 +712,9 @@ function FeatureCard({
   title,
   description,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
+  icon: React.ReactNode,
+  title: string,
+  description: string,
 }) {
   return (
     <Card className="p-6 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
@@ -726,7 +729,7 @@ function FeatureCard({
   );
 }
 
-function TechItem({ label, href }: { label: string; href: string }) {
+function TechItem({ label, href }: { label: string, href: string }) {
   return (
     <a
       href={href}

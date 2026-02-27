@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from 'react';
 
 export interface AdjustmentSettings {
   exposure: number;
@@ -46,10 +46,10 @@ export function useImageProcessor() {
       targetCanvas?: HTMLCanvasElement | null,
     ) => {
       const canvas =
-        targetCanvas || canvasRef.current || document.createElement("canvas");
+        targetCanvas || canvasRef.current || document.createElement('canvas');
       if (!targetCanvas) canvasRef.current = canvas;
 
-      const ctx = canvas.getContext("2d", { alpha: false });
+      const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) return;
 
       // Only resize if needed
@@ -178,7 +178,7 @@ export function useImageProcessor() {
 
       // If we are not rendering to a visible canvas, update the URL (for download)
       if (!targetCanvas) {
-        setProcessedImageUrl(canvas.toDataURL("image/jpeg", 0.9));
+        setProcessedImageUrl(canvas.toDataURL('image/jpeg', 0.9));
       }
     },
     [],

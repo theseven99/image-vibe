@@ -1,1 +1,1 @@
-export const APP_NAME = "Image Vibe";
+export const APP_NAME = 'Image Vibe';

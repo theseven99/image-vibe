@@ -62,6 +62,8 @@ export function ImageSharpenClient() {
   const [exportFormat, setExportFormat] = useState<string>('png');
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const qualityRef = useRef<number>(100);
+  const [customWidth, setCustomWidth] = useState<number>();
+  const [customHeight, setCustomHeight] = useState<number>();
 
   const { originalImage, setOriginalImage, processImage } = useImageProcessor();
 
@@ -94,11 +96,11 @@ export function ImageSharpenClient() {
       setDimensionLimit(rs);
       const { height, width } = getDimensionByOption(rs);
       if (width && height) {
-        updateSetting('imageWidth', width);
-        updateSetting('imageHeight', height);
+        setCustomWidth(width);
+        setCustomHeight(height);
       }
     },
-    [getDimensionByOption, updateSetting],
+    [getDimensionByOption],
   );
 
   const handleImageUpload = useCallback(
@@ -118,13 +120,9 @@ export function ImageSharpenClient() {
             let limitW = 0;
             let limitH = 0;
 
-            if (
-              dimensionLimit === 'custom' &&
-              settings?.imageHeight &&
-              settings?.imageWidth
-            ) {
-              limitW = settings?.imageWidth;
-              limitH = settings?.imageHeight;
+            if (dimensionLimit === 'custom' && customHeight && customWidth) {
+              limitW = customWidth;
+              limitH = customHeight;
             } else {
               const fromOpts = getDimensionByOption(dimensionLimit);
               if (fromOpts?.width && fromOpts?.height) {
@@ -167,7 +165,13 @@ export function ImageSharpenClient() {
       };
       reader.readAsDataURL(file);
     },
-    [dimensionLimit, settings, getDimensionByOption, setOriginalImage],
+    [
+      dimensionLimit,
+      customHeight,
+      customWidth,
+      getDimensionByOption,
+      setOriginalImage,
+    ],
   );
 
   const handleFileChange = useCallback(
@@ -205,8 +209,15 @@ export function ImageSharpenClient() {
   const handleDownload = useCallback(() => {
     if (!originalImage) return;
 
+    const newSettings = { ...settings };
+
+    if (customHeight && customWidth) {
+      newSettings.imageHeight = customHeight;
+      newSettings.imageWidth = customWidth;
+    }
+
     const canvas = document.createElement('canvas');
-    processImage(originalImage, settings, canvas);
+    processImage(originalImage, newSettings, canvas);
 
     let mimeType = 'image/png';
     if (exportFormat === 'jpeg' || exportFormat === 'jpg')
@@ -227,7 +238,14 @@ export function ImageSharpenClient() {
     document.body.removeChild(link);
     setIsExportDialogOpen(false);
     toast.success('Image exported successfully.');
-  }, [originalImage, processImage, settings, exportFormat]);
+  }, [
+    originalImage,
+    customHeight,
+    customWidth,
+    processImage,
+    settings,
+    exportFormat,
+  ]);
 
   useEffect(() => {
     if (!originalImage || !previewCanvasRef.current || !canvasMounted) return;
@@ -316,14 +334,10 @@ export function ImageSharpenClient() {
                         <SelectResolution
                           dimensionOption={dimensionLimit}
                           onChangeDimensionOption={handleSetDimensionLimit}
-                          customHeight={settings?.imageHeight}
-                          customWidth={settings?.imageWidth}
-                          onchangeCustomHeight={(a) =>
-                            updateSetting('imageHeight', a)
-                          }
-                          onchangeCustomWidth={(a) =>
-                            updateSetting('imageWidth', a)
-                          }
+                          customHeight={customHeight}
+                          customWidth={customWidth}
+                          onchangeCustomHeight={(a) => setCustomHeight(a)}
+                          onchangeCustomWidth={(a) => setCustomWidth(a)}
                         />
                       </div>
 
@@ -630,10 +644,10 @@ export function ImageSharpenClient() {
                 <SelectResolution
                   dimensionOption={dimensionLimit}
                   onChangeDimensionOption={handleSetDimensionLimit}
-                  customHeight={settings?.imageHeight}
-                  customWidth={settings?.imageWidth}
-                  onchangeCustomHeight={(a) => updateSetting('imageHeight', a)}
-                  onchangeCustomWidth={(a) => updateSetting('imageWidth', a)}
+                  customHeight={customHeight}
+                  customWidth={customWidth}
+                  onchangeCustomHeight={(a) => setCustomHeight(a)}
+                  onchangeCustomWidth={(a) => setCustomWidth(a)}
                 />
               </TabsContent>
             </div>

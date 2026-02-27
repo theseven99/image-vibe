@@ -73,20 +73,17 @@ export function useImageProcessor() {
         imageWidth,
       } = settings;
 
-      // Only resize if needed
-
+      // Set canvas dimensions: use custom size if provided, otherwise use image's natural size
       if (imageWidth && imageHeight) {
         canvas.width = imageWidth;
         canvas.height = imageHeight;
-      } else if (
-        canvas.width !== image.width ||
-        canvas.height !== image.height
-      ) {
+      } else {
         canvas.width = image.width;
         canvas.height = image.height;
       }
 
-      ctx.drawImage(image, 0, 0);
+      // Draw image scaled to canvas dimensions
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;

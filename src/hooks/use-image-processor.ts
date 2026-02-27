@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 export interface AdjustmentSettings {
   exposure: number;
@@ -14,6 +14,9 @@ export interface AdjustmentSettings {
   saturation: number;
   sharpen: number;
   noiseReduction: number;
+
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
 export const defaultSettings: AdjustmentSettings = {
@@ -28,6 +31,8 @@ export const defaultSettings: AdjustmentSettings = {
   saturation: 0,
   sharpen: 0, // Medium default
   noiseReduction: 0,
+  imageHeight: undefined,
+  imageWidth: undefined,
 };
 
 export function useImageProcessor() {
@@ -52,18 +57,6 @@ export function useImageProcessor() {
       const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) return;
 
-      // Only resize if needed
-      if (canvas.width !== image.width || canvas.height !== image.height) {
-        canvas.width = image.width;
-        canvas.height = image.height;
-      }
-
-      ctx.drawImage(image, 0, 0);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-
-      // 1. Basic Adjustments (Per Pixel)
       const {
         exposure,
         contrast,
@@ -76,7 +69,29 @@ export function useImageProcessor() {
         saturation,
         sharpen,
         noiseReduction,
+        imageHeight,
+        imageWidth,
       } = settings;
+
+      // Only resize if needed
+
+      if (imageWidth && imageHeight) {
+        canvas.width = imageWidth;
+        canvas.height = imageHeight;
+      } else if (
+        canvas.width !== image.width ||
+        canvas.height !== image.height
+      ) {
+        canvas.width = image.width;
+        canvas.height = image.height;
+      }
+
+      ctx.drawImage(image, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // 1. Basic Adjustments (Per Pixel)
 
       const expShift = exposure * 2.55;
       const contrastFactor =

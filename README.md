@@ -1,4 +1,4 @@
-# ✨ Image Vibe
+# ✨ Image Vibe V1.0
 
 ### Elevate Your Visuals with Professional-Grade Precision.
 

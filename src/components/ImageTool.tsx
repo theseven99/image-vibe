@@ -193,7 +193,12 @@ export function ImageSharpenClient() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
-              <h1 className="text-xl font-bold tracking-tight">{APP_NAME}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">{APP_NAME}</h1>
+                <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-[10px] font-bold text-zinc-500 border border-zinc-200 dark:border-white/10 mt-1">
+                  V1.0
+                </span>
+              </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                 {`Professional Adjustment Tool`}
               </span>

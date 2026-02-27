@@ -1,40 +1,41 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowLeft,
-  Upload,
+  Code2,
   Download,
-  RotateCcw,
-  Sun,
-  Palette,
+  Github,
+  Globe,
+  History,
+  Layers,
   Loader2,
   Maximize2,
+  Palette,
+  RotateCcw,
   Settings2,
-  History,
-  Github,
-  Zap,
   Shield,
-  Layers,
-  Code2,
-  Globe,
+  Sun,
   Terminal,
+  Upload,
+  Zap
 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { APP_NAME } from '@/global';
 import {
-  useImageProcessor,
   defaultSettings,
+  useImageProcessor,
   type AdjustmentSettings,
 } from '@/hooks/use-image-processor';
 import { cn } from '@/lib/utils';
-import { APP_NAME } from '@/global';
+import ControlGroup from './ControlGroup';
+import FeatureCard from './FeatureCard';
+import TechItem from './TechItem';
 
 export function ImageSharpenClient() {
   const [settings, setSettings] = useState<AdjustmentSettings>(defaultSettings);
@@ -707,84 +708,5 @@ export function ImageSharpenClient() {
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode,
-  title: string,
-  description: string,
-}) {
-  return (
-    <Card className="p-6 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
-      <div className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <h4 className="font-bold text-lg mb-2">{title}</h4>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-        {description}
-      </p>
-    </Card>
-  );
-}
 
-function TechItem({ label, href }: { label: string, href: string }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer nofollow"
-      className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-white dark:hover:bg-zinc-800 transition-all group"
-    >
-      <span className="text-sm font-semibold">{label}</span>
-      <ArrowLeft className="w-3 h-3 rotate-135 opacity-0 group-hover:opacity-100 transition-opacity" />
-    </a>
-  );
-}
 
-interface ControlGroupProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-  description?: string;
-}
-
-function ControlGroup({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-  description,
-}: ControlGroupProps) {
-  return (
-    <div className="space-y-3 group">
-      <div className="flex justify-between items-end">
-        <div className="flex flex-col">
-          <Label className="text-xs font-bold tracking-tight mb-0.5">
-            {label}
-          </Label>
-          {description && (
-            <span className="text-[9px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-tighter">
-              {description}
-            </span>
-          )}
-        </div>
-        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
-          {value > 0 ? `+${value}` : value}
-        </span>
-      </div>
-      <Slider
-        value={[value]}
-        min={min}
-        max={max}
-        step={1}
-        onValueChange={(vals) => onChange(vals[0])}
-        className="cursor-pointer"
-      />
-    </div>
-  );
-}

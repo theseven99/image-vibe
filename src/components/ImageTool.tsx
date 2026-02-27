@@ -323,7 +323,7 @@ export function ImageSharpenClient() {
                         <img
                           src={originalImage.src}
                           alt="Original"
-                          className="object-contain"
+                          className="object-contain size-full"
                         />
                       </div>
                     )}

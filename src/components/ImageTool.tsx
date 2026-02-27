@@ -189,7 +189,7 @@ export function ImageSharpenClient() {
       </div>
 
       {/* Header */}
-      <nav className="border-b border-zinc-200 dark:border-white/5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-zinc-200 dark:border-white/5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
@@ -210,6 +210,7 @@ export function ImageSharpenClient() {
               size="sm"
               asChild
               className="hidden sm:flex border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5"
+              aria-label="View on GitHub"
             >
               <a
                 href="https://github.com/theseven99/image-vibe"
@@ -235,6 +236,7 @@ export function ImageSharpenClient() {
                   variant="default"
                   onClick={handleDownload}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  aria-label="Export processed image"
                 >
                   <Download className="w-4 h-4 mr-2" /> Export
                 </Button>
@@ -242,7 +244,7 @@ export function ImageSharpenClient() {
             )}
           </div>
         </div>
-      </nav>
+      </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 relative z-10">
         {/* Preview Area */}
@@ -334,6 +336,7 @@ export function ImageSharpenClient() {
                       onTouchStart={() => setShowOriginal(true)}
                       onTouchEnd={() => setShowOriginal(false)}
                       className="absolute bottom-4 right-4 bg-zinc-900/80 dark:bg-white/10 backdrop-blur text-white px-4 py-2 rounded-lg text-xs font-bold tracking-widest uppercase border border-white/10 hover:bg-zinc-900 dark:hover:bg-white/20 transition-colors z-20"
+                      aria-label="Hold to compare with original image"
                     >
                       Hold to Compare
                     </Button>
@@ -381,6 +384,7 @@ export function ImageSharpenClient() {
                   setCanvasMounted(false);
                 }}
                 className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                aria-label="Clear current image"
               >
                 Clear Image
               </Button>
@@ -480,6 +484,14 @@ export function ImageSharpenClient() {
                   onChange={(v) => updateSetting("sharpen", v)}
                   description="Enhances edge definition and micro-contrast"
                 />
+                <ControlGroup
+                  label="Noise Reduction"
+                  value={settings.noiseReduction}
+                  min={0}
+                  max={100}
+                  onChange={(v) => updateSetting("noiseReduction", v)}
+                  description="Smooths out digital noise and grain"
+                />
 
                 <div className="pt-6 border-t border-zinc-100 dark:border-white/5 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -554,24 +566,25 @@ export function ImageSharpenClient() {
         </aside>
       </main>
 
-      {/* README Info Section */}
-      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-zinc-200 dark:border-white/5 space-y-20">
+      {/* SEO Optimized Info Section */}
+      <footer className="max-w-7xl mx-auto px-4 py-16 border-t border-zinc-200 dark:border-white/5 space-y-20">
         {/* Intro */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <article className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20">
-            Professional Precision
+            Professional Image Processing
           </div>
           <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Elevate Your Visuals
+            Professional Online Photo Enhancer
           </h2>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
             Image Vibe is a high-performance, browser-based image laboratory
-            designed for photographers and designers who demand excellence.
+            designed for photographers and designers who demand excellence in
+            every pixel.
           </p>
-        </div>
+        </article>
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <article className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <FeatureCard
             icon={<Zap className="w-5 h-5 text-yellow-500" />}
             title="Instant Processing"
@@ -580,7 +593,7 @@ export function ImageSharpenClient() {
           <FeatureCard
             icon={<Palette className="w-5 h-5 text-purple-500" />}
             title="Pro-Grade Adjustments"
-            description="Fine-tune Exposure, Contrast, Highlights, and more with surgical precision."
+            description="Fine-tune Exposure, Contrast, Highlights, Sharpen, Noise Reduction, and more with surgical precision."
           />
           <FeatureCard
             icon={<Maximize2 className="w-5 h-5 text-blue-500" />}
@@ -597,12 +610,17 @@ export function ImageSharpenClient() {
             title="Micro-Contrast"
             description="Advanced convolution filters to extract hidden details and edge definition."
           />
+          {/* <FeatureCard
+            icon={<Maximize2 className="w-5 h-5 text-indigo-500" />}
+            title="Noise Reduction"
+            description="Advanced smoothing algorithm to reduce digital noise and grain while preserving detail."
+          /> */}
           <FeatureCard
             icon={<Layers className="w-5 h-5 text-pink-500" />}
             title="Premium HUD UI"
             description="A stunning, glassmorphic interface designed for deep focus and clarity."
           />
-        </div>
+        </article>
 
         {/* Tech Stack & Dev */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -677,10 +695,11 @@ export function ImageSharpenClient() {
 
         <div className="text-center pt-12">
           <p className="text-sm font-medium text-zinc-500 dark:text-zinc-600 italic">
-            Created with passion for the perfect frame.
+            Developed by theseven99 — Studio-quality image editing directly in
+            your browser.
           </p>
         </div>
-      </section>
+      </footer>
     </div>
   );
 }

@@ -13,6 +13,7 @@ export interface AdjustmentSettings {
   tint: number;
   saturation: number;
   sharpen: number;
+  noiseReduction: number;
 }
 
 export const defaultSettings: AdjustmentSettings = {
@@ -25,15 +26,16 @@ export const defaultSettings: AdjustmentSettings = {
   temperature: 0,
   tint: 0,
   saturation: 0,
-  sharpen: 50, // Medium default
+  sharpen: 0, // Medium default
+  noiseReduction: 0,
 };
 
 export function useImageProcessor() {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(
-    null
+    null,
   );
   const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(
-    null
+    null,
   );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -41,7 +43,7 @@ export function useImageProcessor() {
     (
       image: HTMLImageElement,
       settings: AdjustmentSettings,
-      targetCanvas?: HTMLCanvasElement | null
+      targetCanvas?: HTMLCanvasElement | null,
     ) => {
       const canvas =
         targetCanvas || canvasRef.current || document.createElement("canvas");
@@ -73,6 +75,7 @@ export function useImageProcessor() {
         tint,
         saturation,
         sharpen,
+        noiseReduction,
       } = settings;
 
       const expShift = exposure * 2.55;
@@ -147,10 +150,29 @@ export function useImageProcessor() {
           ctx,
           canvas.width,
           canvas.height,
-          kernel
+          kernel,
         );
         if (sharpenedData) {
           ctx.putImageData(sharpenedData, 0, 0);
+        }
+      }
+
+      // 3. Noise Reduction (Smoothing Convolution)
+      if (noiseReduction > 0) {
+        // Simple 3x3 box blur kernel
+        const blurAmount = noiseReduction / 100;
+        const v = blurAmount / 9;
+        const center = 1 - blurAmount + v;
+        const kernel = [v, v, v, v, center, v, v, v, v];
+
+        const smoothedData = applyConvolution(
+          ctx,
+          canvas.width,
+          canvas.height,
+          kernel,
+        );
+        if (smoothedData) {
+          ctx.putImageData(smoothedData, 0, 0);
         }
       }
 
@@ -159,7 +181,7 @@ export function useImageProcessor() {
         setProcessedImageUrl(canvas.toDataURL("image/jpeg", 0.9));
       }
     },
-    []
+    [],
   );
 
   return {
@@ -175,7 +197,7 @@ function applyConvolution(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
-  kernel: number[]
+  kernel: number[],
 ) {
   const input = ctx.getImageData(0, 0, width, height);
   const output = ctx.createImageData(width, height);

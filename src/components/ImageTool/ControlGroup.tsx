@@ -1,9 +1,10 @@
-import { Label } from "../ui/label";
-import { Slider } from "../ui/slider";
+import { Label } from '../ui/label';
+import { Slider } from '../ui/slider';
 
 interface ControlGroupProps {
   label: string;
-  value: number;
+  value?: number;
+  defaultValue?: number;
   min: number;
   max: number;
   onChange: (value: number) => void;
@@ -13,6 +14,7 @@ interface ControlGroupProps {
 export default function ControlGroup({
   label,
   value,
+  defaultValue,
   min,
   max,
   onChange,
@@ -32,11 +34,12 @@ export default function ControlGroup({
           )}
         </div>
         <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
-          {value > 0 ? `+${value}` : value}
+          {!!value && (value > 0 ? `+${value}` : value)}
         </span>
       </div>
       <Slider
-        value={[value]}
+        value={value ? [value] : undefined}
+        defaultValue={defaultValue ? [defaultValue] : undefined}
         min={min}
         max={max}
         step={1}

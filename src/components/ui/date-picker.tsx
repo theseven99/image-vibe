@@ -18,9 +18,9 @@ export function DatePicker({
   onChange,
   className,
 }: {
-  value: Date | null,
-  onChange: (value: Date | null) => void,
-  className?: string,
+  value: Date | null;
+  onChange: (value: Date | null) => void;
+  className?: string;
 }) {
   const [date, setDate] = React.useState<Date | null>(value);
 

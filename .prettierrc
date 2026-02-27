@@ -5,6 +5,5 @@
   "semi": true,
   "singleQuote": true,
   "jsxSingleQuote": false,
-  "endOfLine": "crlf",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "endOfLine": "crlf"
 }

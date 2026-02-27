@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-// eslint-disable-next-line prettier/prettier
+
 import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import {

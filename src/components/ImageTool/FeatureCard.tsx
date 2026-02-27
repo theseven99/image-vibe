@@ -1,13 +1,13 @@
-import { Card } from "../ui/card";
+import { Card } from '../ui/card';
 
 export default function FeatureCard({
   icon,
   title,
   description,
 }: {
-  icon: React.ReactNode,
-  title: string,
-  description: string,
+  icon: React.ReactNode;
+  title: string;
+  description: string;
 }) {
   return (
     <Card className="p-6 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">

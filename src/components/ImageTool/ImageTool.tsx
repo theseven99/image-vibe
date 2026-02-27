@@ -17,14 +17,28 @@ import {
   Sun,
   Terminal,
   Upload,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { APP_NAME } from '@/global';
 import {
@@ -46,6 +60,9 @@ export function ImageSharpenClient() {
   const [dimensionLimit, setDimensionLimit] = useState<string>('1080p');
   const [customWidth, setCustomWidth] = useState<number>(1920);
   const [customHeight, setCustomHeight] = useState<number>(1080);
+  const [exportFormat, setExportFormat] = useState<string>('png');
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const qualityRef = useRef<number>(100);
 
   const { originalImage, setOriginalImage, processImage } = useImageProcessor();
 
@@ -154,16 +171,27 @@ export function ImageSharpenClient() {
 
     const canvas = document.createElement('canvas');
     processImage(originalImage, settings, canvas);
-    const processedImage = canvas.toDataURL('image/jpeg', 0.95);
+
+    let mimeType = 'image/png';
+    if (exportFormat === 'jpeg' || exportFormat === 'jpg')
+      mimeType = 'image/jpeg';
+    else if (exportFormat === 'webp') mimeType = 'image/webp';
+    else if (exportFormat === 'ico') mimeType = 'image/x-icon';
+
+    const processedImage = canvas.toDataURL(
+      mimeType,
+      exportFormat === 'png' ? undefined : qualityRef.current / 100,
+    );
 
     const link = document.createElement('a');
     link.href = processedImage;
-    link.download = `enhanced-${Date.now()}.jpg`;
+    link.download = `enhanced-${Date.now()}.${exportFormat}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setIsExportDialogOpen(false);
     toast.success('Image exported successfully.');
-  }, [originalImage, processImage, settings]);
+  }, [originalImage, processImage, settings, exportFormat]);
 
   useEffect(() => {
     if (!originalImage || !previewCanvasRef.current || !canvasMounted) return;
@@ -235,15 +263,73 @@ export function ImageSharpenClient() {
                 >
                   <RotateCcw className="w-4 h-4 mr-2" /> Reset
                 </Button>
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={handleDownload}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                  aria-label="Export processed image"
+                <Dialog
+                  open={isExportDialogOpen}
+                  onOpenChange={setIsExportDialogOpen}
                 >
-                  <Download className="w-4 h-4 mr-2" /> Export
-                </Button>
+                  <DialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                      aria-label="Export processed image"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {` Export`}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md border-zinc-200 dark:border-white/10 dark:bg-zinc-900">
+                    <DialogHeader>
+                      <DialogTitle>Export Image</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <ControlGroup
+                          label="Quality"
+                          defaultValue={100}
+                          min={0}
+                          max={100}
+                          onChange={(value) => (qualityRef.current = value)}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label className="text-xs font-bold tracking-tight mb-0.5">
+                          Format
+                        </Label>
+                        <Select
+                          value={exportFormat}
+                          onValueChange={setExportFormat}
+                        >
+                          <SelectTrigger className="w-full bg-transparent border-zinc-200 dark:border-white/10">
+                            <SelectValue placeholder="Select format" />
+                          </SelectTrigger>
+                          <SelectContent className="border-zinc-200 dark:border-white/10 dark:bg-zinc-900">
+                            <SelectItem value="png">{`PNG (Best quality, lossless)`}</SelectItem>
+                            <SelectItem value="jpeg">{`JPEG (Smaller file size)`}</SelectItem>
+                            <SelectItem value="webp">{`WEBP (Modern web format)`}</SelectItem>
+                            <SelectItem value="ico">{`ICO (Icon format)`}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsExportDialogOpen(false)}
+                        className="border-zinc-200 dark:border-white/10"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleDownload}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Download className="w-4 h-4 mr-2" /> Download
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </>
             )}
           </div>
@@ -707,6 +793,3 @@ export function ImageSharpenClient() {
     </div>
   );
 }
-
-
-

@@ -1,10 +1,10 @@
 import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier'; // Import Prettier configuration
 import eslintPluginPrettier from 'eslint-plugin-prettier'; // Import Prettier plugin
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
@@ -30,11 +30,11 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
-      'prettier': eslintPluginPrettier, // Add Prettier plugin
+      prettier: eslintPluginPrettier, // Add Prettier plugin
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'eqeqeq': ['error', 'always'], // Require the use of === and !==
+      eqeqeq: ['error', 'always'], // Require the use of === and !==
       'react-refresh/only-export-components': [
         'warn',
         {
@@ -44,14 +44,13 @@ export default tseslint.config(
       'prettier/prettier': [
         'error', // Enable Prettier rules as ESLint errors
         {
-          "trailingComma": "all",
-          "tabWidth": 2,
-          "printWidth": 80,
-          "semi": true,
-          "singleQuote": true,
-          "jsxSingleQuote": false,
-          "endOfLine": "crlf",
-          "plugins": ["prettier-plugin-tailwindcss"]
+          trailingComma: 'all',
+          tabWidth: 2,
+          printWidth: 80,
+          semi: true,
+          singleQuote: true,
+          jsxSingleQuote: false,
+          endOfLine: 'crlf',
         },
       ],
     },

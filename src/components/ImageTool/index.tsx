@@ -1,3 +1,3 @@
-import { ImageSharpenClient } from "./ImageTool";
+import { ImageSharpenClient } from './ImageTool';
 
-export default ImageSharpenClient
+export default ImageSharpenClient;

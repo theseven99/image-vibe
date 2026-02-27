@@ -70,5 +70,4 @@ Ready for high-performance hosting:
 
 <div align="center">
   <p>Created by <strong>theseven99</strong> with passion for the perfect frame.</p>
-  <p><a href="https://github.com/theseven99/image-vibe">View on GitHub</a></p>
 </div>

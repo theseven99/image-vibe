@@ -13,6 +13,13 @@ import {
   Maximize2,
   Settings2,
   History,
+  Github,
+  Zap,
+  Shield,
+  Layers,
+  Code2,
+  Globe,
+  Terminal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -175,7 +182,7 @@ export function ImageSharpenClient() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-200 pb-12 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-slate-900 dark:text-slate-200 pb-12 relative font-sans">
       {/* HUD-like background effect */}
       <div className="fixed inset-0 pointer-events-none opacity-5 dark:opacity-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-primary)_1px,transparent_1px)] bg-size-[40px_40px]" />
@@ -193,6 +200,21 @@ export function ImageSharpenClient() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="hidden sm:flex border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5"
+            >
+              <a
+                href="https://github.com/theseven99/image-vibe"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="w-4 h-4 mr-2" />
+                GitHub
+              </a>
+            </Button>
             {originalImage && (
               <>
                 <Button
@@ -526,7 +548,171 @@ export function ImageSharpenClient() {
           </div>
         </aside>
       </main>
+
+      {/* README Info Section */}
+      <section className="max-w-7xl mx-auto px-4 py-16 border-t border-zinc-200 dark:border-white/5 space-y-20">
+        {/* Intro */}
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/20">
+            Professional Precision
+          </div>
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Elevate Your Visuals
+          </h2>
+          <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            Image Vibe is a high-performance, browser-based image laboratory
+            designed for photographers and designers who demand excellence.
+          </p>
+        </div>
+
+        {/* Features */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <FeatureCard
+            icon={<Zap className="w-5 h-5 text-yellow-500" />}
+            title="Instant Processing"
+            description="Real-time feedback with zero latency. See your changes as you make them."
+          />
+          <FeatureCard
+            icon={<Palette className="w-5 h-5 text-purple-500" />}
+            title="Pro-Grade Adjustments"
+            description="Fine-tune Exposure, Contrast, Highlights, and more with surgical precision."
+          />
+          <FeatureCard
+            icon={<Maximize2 className="w-5 h-5 text-blue-500" />}
+            title="Intelligent Resizing"
+            description="Native 720p, 1080p, and Custom dimension limits to optimize your output."
+          />
+          <FeatureCard
+            icon={<Shield className="w-5 h-5 text-green-500" />}
+            title="Privacy First"
+            description="Your images never leave your machine. All processing happens locally."
+          />
+          <FeatureCard
+            icon={<Sun className="w-5 h-5 text-orange-500" />}
+            title="Micro-Contrast"
+            description="Advanced convolution filters to extract hidden details and edge definition."
+          />
+          <FeatureCard
+            icon={<Layers className="w-5 h-5 text-pink-500" />}
+            title="Premium HUD UI"
+            description="A stunning, glassmorphic interface designed for deep focus and clarity."
+          />
+        </div>
+
+        {/* Tech Stack & Dev */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/5 p-8 rounded-3xl shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Code2 className="w-32 h-32" />
+            </div>
+            <div className="relative space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold">The Tech Stack</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                  Built upon a foundation of modern web excellence.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <TechItem label="Vite" href="https://vitejs.dev/" />
+                <TechItem label="React 19" href="https://react.dev/" />
+                <TechItem
+                  label="Tailwind CSS v4"
+                  href="https://tailwindcss.com/"
+                />
+                <TechItem
+                  label="Framer Motion"
+                  href="https://www.framer.com/motion/"
+                />
+                <TechItem label="Radix UI" href="https://www.radix-ui.com/" />
+                <TechItem label="Lucide Icons" href="https://lucide.dev/" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-zinc-900 dark:bg-black border-white/10 p-8 rounded-3xl shadow-xl text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <Terminal className="w-32 h-32 text-blue-500" />
+            </div>
+            <div className="relative space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold">Local Development</h3>
+                <p className="text-zinc-400 text-sm">Get started in seconds.</p>
+              </div>
+              <div className="space-y-4 font-mono text-sm">
+                <div className="space-y-2">
+                  <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">
+                    1. Clone repository
+                  </p>
+                  <code className="block bg-white/5 p-3 rounded-lg border border-white/10 text-blue-400">
+                    git clone https://github.com/theseven99/image-vibe.git
+                  </code>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">
+                    2. Install & Start
+                  </p>
+                  <code className="block bg-white/5 p-3 rounded-lg border border-white/10 text-blue-400">
+                    npm install && npm run dev
+                  </code>
+                </div>
+              </div>
+              <div className="pt-4 flex items-center gap-4 text-xs text-zinc-500">
+                <div className="flex items-center gap-1.5">
+                  <Globe className="w-3 h-3" />
+                  <span>GitHub Pages Ready</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Zap className="w-3 h-3" />
+                  <span>Vercel Optimized</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="text-center pt-12">
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-600 italic">
+            Created with passion for the perfect frame.
+          </p>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Card className="p-6 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+      <div className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        {icon}
+      </div>
+      <h4 className="font-bold text-lg mb-2">{title}</h4>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+        {description}
+      </p>
+    </Card>
+  );
+}
+
+function TechItem({ label, href }: { label: string; href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 hover:border-blue-500/50 hover:bg-white dark:hover:bg-zinc-800 transition-all group"
+    >
+      <span className="text-sm font-semibold">{label}</span>
+      <ArrowLeft className="w-3 h-3 rotate-135 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </a>
   );
 }
 

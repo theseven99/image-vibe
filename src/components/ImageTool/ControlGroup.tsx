@@ -1,3 +1,4 @@
+import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Slider } from '../ui/slider';
 
@@ -33,19 +34,29 @@ export default function ControlGroup({
             </span>
           )}
         </div>
-        <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
+        {/* <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
           {!!value && (value > 0 ? `+${value}` : value)}
-        </span>
+        </span> */}
       </div>
-      <Slider
-        value={value ? [value] : undefined}
-        defaultValue={defaultValue ? [defaultValue] : undefined}
-        min={min}
-        max={max}
-        step={1}
-        onValueChange={(vals) => onChange(vals[0])}
-        className="cursor-pointer"
-      />
+      <div className="flex flex-row gap-1">
+        <Slider
+          value={value !== undefined ? [value] : undefined}
+          defaultValue={defaultValue !== undefined ? [defaultValue] : undefined}
+          min={min}
+          max={max}
+          step={1}
+          onValueChange={(vals) => onChange(vals[0])}
+          className="cursor-pointer"
+        />
+        <Input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          min={min}
+          max={max}
+          className="w-24"
+        />
+      </div>
     </div>
   );
 }
